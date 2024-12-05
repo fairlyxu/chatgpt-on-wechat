@@ -5,11 +5,10 @@ import requests
 import threading
 import time
 from bridge.reply import Reply, ReplyType
+import aiohttp
 import asyncio
 from bridge.context import ContextType
 from plugins import EventContext, EventAction
-from .utils import Util
-
 
 INVALID_REQUEST = 410
 NOT_FOUND_ORIGIN_IMAGE = 461
@@ -50,7 +49,7 @@ task_name_mapping = {
 
 
 class MJTask:
-    def __init__(self, id, user_id: str, task_type: TaskType, raw_prompt=None, expires: int = 60 * 6,
+    def __init__(self, id, user_id: str, task_type: TaskType, raw_prompt=None, expires: int = 60 * 30,
                  status=Status.PENDING):
         self.id = id
         self.user_id = user_id
@@ -68,11 +67,10 @@ class MJTask:
 
 # midjourney bot
 class MJBot:
-    def __init__(self, config, fetch_group_app_code):
-        self.base_url = conf().get("linkai_api_base", "https://api.link-ai.tech") + "/v1/img/midjourney"
+    def __init__(self, config):
+        self.base_url = conf().get("linkai_api_base", "https://api.link-ai.chat") + "/v1/img/midjourney"
         self.headers = {"Authorization": "Bearer " + conf().get("linkai_api_key")}
         self.config = config
-        self.fetch_group_app_code = fetch_group_app_code
         self.tasks = {}
         self.temp_dict = {}
         self.tasks_lock = threading.Lock()
@@ -90,8 +88,6 @@ class MJBot:
         context = e_context['context']
         if context.type == ContextType.TEXT:
             cmd_list = context.content.split(maxsplit=1)
-            if not cmd_list:
-                return None
             if cmd_list[0].lower() == f"{trigger_prefix}mj":
                 return TaskType.GENERATE
             elif cmd_list[0].lower() == f"{trigger_prefix}mju":
@@ -100,7 +96,7 @@ class MJBot:
                 return TaskType.VARIATION
             elif cmd_list[0].lower() == f"{trigger_prefix}mjr":
                 return TaskType.RESET
-        elif context.type == ContextType.IMAGE_CREATE and self.config.get("use_image_create_prefix") and self._is_mj_open(context):
+        elif context.type == ContextType.IMAGE_CREATE and self.config.get("use_image_create_prefix") and self.config.get("enabled"):
             return TaskType.GENERATE
 
     def process_mj_task(self, mj_type: TaskType, e_context: EventContext):
@@ -118,9 +114,6 @@ class MJBot:
             return
 
         if len(cmd) == 2 and (cmd[1] == "open" or cmd[1] == "close"):
-            if not Util.is_admin(e_context):
-                Util.set_reply_text("需要管理员权限执行", e_context, level=ReplyType.ERROR)
-                return
             # midjourney 开关指令
             is_open = True
             tips_text = "开启"
@@ -131,8 +124,8 @@ class MJBot:
             self._set_reply_text(f"Midjourney绘画已{tips_text}", e_context, level=ReplyType.INFO)
             return
 
-        if not self._is_mj_open(context):
-            logger.warn("Midjourney绘画未开启，请查看 plugins/linkai/config.json 中的配置，或者在LinkAI平台 应用中添加/打开”MJ“插件")
+        if not self.config.get("enabled"):
+            logger.warn("Midjourney绘画未开启，请查看 plugins/linkai/config.json 中的配置")
             self._set_reply_text(f"Midjourney绘画未开启", e_context, level=ReplyType.INFO)
             return
 
@@ -411,25 +404,6 @@ class MJBot:
                     result.append(task)
         return result
 
-    def _is_mj_open(self, context) -> bool:
-        # 获取远程应用插件状态
-        remote_enabled = False
-        if context.kwargs.get("isgroup"):
-            # 群聊场景只查询群对应的app_code
-            group_name = context.get("msg").from_user_nickname
-            app_code = self.fetch_group_app_code(group_name)
-            if app_code:
-                remote_enabled = Util.fetch_app_plugin(app_code, "Midjourney")
-        else:
-            # 非群聊场景使用全局app_code
-            app_code = conf().get("linkai_app_code")
-            if app_code:
-                remote_enabled = Util.fetch_app_plugin(app_code, "Midjourney")
-
-        # 本地配置
-        base_enabled = self.config.get("enabled")
-
-        return base_enabled or remote_enabled
 
 def _send(channel, reply: Reply, context, retry_cnt=0):
     try:

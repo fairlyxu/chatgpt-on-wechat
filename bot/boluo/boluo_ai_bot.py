@@ -20,22 +20,14 @@ from config import conf, load_config
 BASE_HOST="http://101.43.28.24:6061"
 
 # OpenAI对话模型API (可用)
-class ChatGPTBot(Bot, OpenAIImage):
+class BoluoAIBot(Bot):
     def __init__(self):
         super().__init__()
-        # set the default api_key
-        openai.api_key = conf().get("open_ai_api_key")
-        if conf().get("open_ai_api_base"):
-            openai.api_base = conf().get("open_ai_api_base")
-        proxy = conf().get("proxy")
-        if proxy:
-            openai.proxy = proxy
-        if conf().get("rate_limit_chatgpt"):
-            self.tb4chatgpt = TokenBucket(conf().get("rate_limit_chatgpt", 20))
+        print("～～～～～～～～～～～init")
 
-        self.sessions = SessionManager(ChatGPTSession, model=conf().get("model") or "gpt-3.5-turbo")
+        self.sessions = SessionManager(ChatGPTSession, model=conf().get("model") or "boluo")
         self.args = {
-            "model": conf().get("model") or "gpt-3.5-turbo",  # 对话模型的名称
+            "model": conf().get("model") or "boluo",  # 对话模型的名称
             "temperature": conf().get("temperature", 0.9),  # 值在[0,1]之间，越大表示回复越具有不确定性
             # "max_tokens":4096,  # 回复最大的字符数
             "top_p": conf().get("top_p", 1),
@@ -48,8 +40,7 @@ class ChatGPTBot(Bot, OpenAIImage):
     def reply(self, query, context=None):
         # acquire reply content
         if context.type == ContextType.TEXT:
-            logger.info("[CHATGPT] query={}".format(query))
-
+            logger.info("[BOLUO] query={}".format(query))
             session_id = context["session_id"]
             reply = None
             clear_memory_commands = conf().get("clear_memory_commands", ["#清除记忆"])
@@ -80,11 +71,10 @@ class ChatGPTBot(Bot, OpenAIImage):
             if query.startswith("请你随机使用一种风格说一句问候语来欢迎新用户") and query.endswith("加入群聊。"):
                 isnewer = True
 
-            #reply_content = self.reply_text(session, api_key, args=new_args,isnewer = isnewer)
             reply_content = self.reply_text(session, api_key, args=new_args, isnewer=isnewer)
 
             logger.debug(
-                "[CHATGPT] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
+                "[Boluo] new_query={}, session_id={}, reply_cont={}, completion_tokens={}".format(
                     session.messages,
                     session_id,
                     reply_content["content"],
@@ -132,17 +122,13 @@ class ChatGPTBot(Bot, OpenAIImage):
             headers = {
                 'Content-Type': 'application/json'
             }
-
             payload = {'messages': session.messages}
-
             print("*"*100, payload)
             response = requests.request("POST", self.base_url, headers=headers, data=json.dumps(payload))
             print("response:", type(response))
 
-
-            logger.info("[BAIDU] reply={}".format(response.text))
+            logger.info("[Boluo] reply={}".format(response.text))
             answer = response.text
-            print(response,answer)
             welcom_msg = conf().get("welcome_msg")
             print("@@@@@@@@@@@@@" * 10)
             if isnewer:

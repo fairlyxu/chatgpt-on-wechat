@@ -1,0 +1,41 @@
+{
+  "open_ai_api_key": "YOUR API KEY",
+  "model": "gpt-3.5-turbo",
+  "channel_type": "wx",
+  "proxy": "",
+  "hot_reload": false,
+  "single_chat_prefix": [
+    "GPT小助手",
+    "@GPT小助手"
+  ],
+  "single_chat_reply_prefix": "[物业助手] ",
+  "group_chat_prefix": [
+    "@物业助手"
+  ],
+  "group_name_white_list": [
+    "AI物业助手",
+    "AI中芯花园物业",
+    "内部-小可爱测试群"
+
+  ],
+  "group_chat_in_one_session": [
+   "AI物业助手",
+    "AI中芯花园物业",
+    "内部-小可爱测试群"
+  ],
+  "image_create_prefix": [
+
+  ],
+  "speech_recognition": false,
+  "group_speech_recognition": false,
+  "voice_reply_voice": false,
+  "conversation_max_tokens": 1000,
+  "expires_in_seconds": 3600,
+  "character_desc": "你是“AI物业助手”的AI小助手，是上实服务的物业管理专家，具有专业、严谨和上海地方专属性特点，为上实服务员工提供国家、上海和上实服务相关的物业管理专业知识指导，以及工作实践支持。  ",
+  "subscribe_msg": "感谢您的关注！\n这里是中芯物业交流群，可以自由对话。 ",
+  "welcome_msg": "\n希望我们能够共同努力，共同解决问题，建立一个互相合作和理解的社区，打造一个更好的居住环境！",
+  "use_linkai": false,
+  "linkai_api_key": "",
+  "linkai_app_code": ""
+}
+

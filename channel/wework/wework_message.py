@@ -8,7 +8,6 @@ import pilk
 from bridge.context import ContextType
 from channel.chat_message import ChatMessage
 from common.log import logger
-from ntwork.const import send_type
 
 
 def get_with_retry(get_func, max_retries=5, delay=5):
@@ -42,40 +41,15 @@ def cdn_download(wework, message, file_name):
     data = message["data"]
     aes_key = data["cdn"]["aes_key"]
     file_size = data["cdn"]["size"]
+    file_type = 2
+    file_id = data["cdn"]["file_id"]
 
     # 获取当前工作目录，然后与文件名拼接得到保存路径
     current_dir = os.getcwd()
     save_path = os.path.join(current_dir, "tmp", file_name)
 
-    # 下载保存图片到本地
-    if "url" in data["cdn"].keys() and "auth_key" in data["cdn"].keys():
-        url = data["cdn"]["url"]
-        auth_key = data["cdn"]["auth_key"]
-        # result = wework.wx_cdn_download(url, auth_key, aes_key, file_size, save_path)  # ntwork库本身接口有问题，缺失了aes_key这个参数
-        """
-        下载wx类型的cdn文件，以https开头
-        """
-        data = {
-            'url': url,
-            'auth_key': auth_key,
-            'aes_key': aes_key,
-            'size': file_size,
-            'save_path': save_path
-        }
-        result = wework._WeWork__send_sync(send_type.MT_WXCDN_DOWNLOAD_MSG, data)  # 直接用wx_cdn_download的接口内部实现来调用
-    elif "file_id" in data["cdn"].keys():
-        if message["type"] == 11042:
-            file_type = 2
-        elif message["type"] == 11045:
-            file_type = 5
-        file_id = data["cdn"]["file_id"]
-        result = wework.c2c_cdn_download(file_id, aes_key, file_size, file_type, save_path)
-    else:
-        logger.error(f"something is wrong, data: {data}")
-        return
-
-    # 输出下载结果
-    logger.debug(f"result: {result}")
+    result = wework.c2c_cdn_download(file_id, aes_key, file_size, file_type, save_path)
+    logger.debug(result)
 
 
 def c2c_download_and_convert(wework, message, file_name):
@@ -131,18 +105,6 @@ class WeworkMessage(ChatMessage):
                 self.ctype = ContextType.IMAGE
                 self.content = os.path.join(current_dir, "tmp", file_name)
                 self._prepare_fn = lambda: cdn_download(wework, wework_msg, file_name)
-            elif wework_msg["type"] == 11045:  # 文件消息
-                print("文件消息")
-                print(wework_msg)
-                file_name = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-                file_name = file_name + wework_msg['data']['cdn']['file_name']
-                current_dir = os.getcwd()
-                self.ctype = ContextType.FILE
-                self.content = os.path.join(current_dir, "tmp", file_name)
-                self._prepare_fn = lambda: cdn_download(wework, wework_msg, file_name)
-            elif wework_msg["type"] == 11047:  # 链接消息
-                self.ctype = ContextType.SHARING
-                self.content = wework_msg['data']['url']
             elif wework_msg["type"] == 11072:  # 新成员入群通知
                 self.ctype = ContextType.JOIN_GROUP
                 member_list = wework_msg['data']['member_list']
@@ -194,7 +156,6 @@ class WeworkMessage(ChatMessage):
                 if conversation_id:
                     room_info = get_room_info(wework=wework, conversation_id=conversation_id)
                     self.other_user_nickname = room_info.get('nickname', None) if room_info else None
-                    self.from_user_nickname = room_info.get('nickname', None) if room_info else None
                     at_list = data.get('at_list', [])
                     tmp_list = []
                     for at in at_list:

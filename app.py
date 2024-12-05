@@ -3,13 +3,16 @@
 import os
 import signal
 import sys
-import time
 
 from channel import channel_factory
-from common import const
-from config import load_config
+from common.log import logger
+from config import conf, load_config
 from plugins import *
-import threading
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--config_file', type=str, help='配置文件目录', default="config.json")
 
 
 def sigterm_handler_wrap(_signo):
@@ -25,25 +28,10 @@ def sigterm_handler_wrap(_signo):
     signal.signal(_signo, func)
 
 
-def start_channel(channel_name: str):
-    channel = channel_factory.create_channel(channel_name)
-    if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework",
-                        const.FEISHU, const.DINGTALK]:
-        PluginManager().load_plugins()
-
-    if conf().get("use_linkai"):
-        try:
-            from common import linkai_client
-            threading.Thread(target=linkai_client.start, args=(channel,)).start()
-        except Exception as e:
-            pass
-    channel.startup()
-
-
-def run():
+def run(configfile=""):
     try:
         # load config
-        load_config()
+        load_config(configfile)
         # ctrl + c
         sigterm_handler_wrap(signal.SIGINT)
         # kill signal
@@ -57,15 +45,22 @@ def run():
 
         if channel_name == "wxy":
             os.environ["WECHATY_LOG"] = "warn"
+            # os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '127.0.0.1:9001'
 
-        start_channel(channel_name)
+        channel = channel_factory.create_channel(channel_name)
+        if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework"]:
+            PluginManager().load_plugins()
 
-        while True:
-            time.sleep(1)
+        # startup channel
+        channel.startup()
     except Exception as e:
         logger.error("App startup failed!")
         logger.exception(e)
 
 
 if __name__ == "__main__":
-    run()
+    parser.parse_args()
+    args = parser.parse_args()
+    # 打印定位参数echo
+    print(args.config_file)
+    run(args.config_file)
