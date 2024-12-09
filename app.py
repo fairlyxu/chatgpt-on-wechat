@@ -9,6 +9,7 @@ from common.log import logger
 from config import conf, load_config
 from plugins import *
 import argparse
+from gui.login_gui import start_login
 
 parser = argparse.ArgumentParser()
 

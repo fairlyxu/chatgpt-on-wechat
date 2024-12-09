@@ -124,6 +124,12 @@ class WechatChannel(ChatChannel):
         self.user_id = itchat.instance.storageClass.userName
         self.name = itchat.instance.storageClass.nickName
         logger.info("Wechat login success, user_id: {}, nickname: {}".format(self.user_id, self.name))
+        import webbrowser
+
+        # 你想要打开的网址
+        url = 'http://47.116.76.13:83/index'
+        # 打开默认浏览器
+        webbrowser.open(url)
         # start message listener
         itchat.run()
 

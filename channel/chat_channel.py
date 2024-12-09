@@ -5,6 +5,7 @@ import time
 from asyncio import CancelledError
 from concurrent.futures import Future, ThreadPoolExecutor
 
+import itchat.components.register
 from bridge.context import *
 from bridge.reply import *
 from channel.channel import Channel
@@ -12,6 +13,7 @@ from common.dequeue import Dequeue
 from common.log import logger
 from config import conf
 from plugins import *
+from utils.chat_api import chat_api
 
 try:
     from voice.audio_convert import any_to_wav
@@ -28,6 +30,19 @@ class ChatChannel(Channel):
     lock = threading.Lock()  # 用于控制对sessions的访问
     handler_pool = ThreadPoolExecutor(max_workers=8)  # 处理消息的线程池
 
+    chat_record = {
+        "wxTs": 1733382304,
+        "wxChatId": 5730444725065747104,
+        "fromUserNickname": "name",
+        "fromUserId": "id",
+        "ctype": 1,
+        "content": "content",
+        "groupName": "groupName",
+        "groupId": "@@groupId",
+        "isGroup": True,
+        "isAns": 0
+    }
+
     def __init__(self):
         _thread = threading.Thread(target=self.consume)
         _thread.setDaemon(True)
@@ -35,6 +50,9 @@ class ChatChannel(Channel):
 
     # 根据消息构造context，消息内容相关的触发项写在这里
     def _compose_context(self, ctype: ContextType, content, **kwargs):
+        print("ctype:", ctype, "content:", content)
+        print("kwargs:", kwargs)
+        print("uid:",self.user_id)
 
         context = Context(ctype, content)
         context.kwargs = kwargs
@@ -55,7 +73,6 @@ class ChatChannel(Channel):
             if context.get("isgroup", False):
                 group_name = cmsg.other_user_nickname
                 group_id = cmsg.other_user_id
-
                 group_name_white_list = config.get("group_name_white_list", [])
                 group_name_keyword_white_list = config.get("group_name_keyword_white_list", [])
                 if any(
@@ -66,12 +83,24 @@ class ChatChannel(Channel):
                     ]
                 ):
                     print("---" * 10, "这是群消息:", "---" * 10,cmsg.create_time)
-                    # msg_obj = context["msg"]
-                    print("id:", cmsg.msg_id, " group name:", group_name, "group id", group_id)
-                    print("ctype:", cmsg.ctype)
-                    print("actual_user_id:", cmsg.actual_user_id)
-                    print("actual_user_nickname:", cmsg.actual_user_nickname)
-                    print("content:", cmsg.content)
+                    self.chat_record['wxTs'] = cmsg.create_time
+                    self.chat_record['wxChatId'] = cmsg.msg_id
+                    self.chat_record['fromUserNickname'] = cmsg.actual_user_nickname
+                    self.chat_record['fromUserId'] = cmsg.actual_user_id
+                    self.chat_record['ctype'] = cmsg.ctype.value
+                    self.chat_record['content'] = cmsg.content
+                    self.chat_record['groupName'] = group_name
+                    self.chat_record['groupId'] = group_id
+                    if cmsg.actual_user_id == self.user_id :
+                        self.chat_record['isAns'] = 1
+                    else:
+                        self.chat_record['isAns'] = 0
+
+                    print("cmsg: ", self.chat_record)
+                    try:
+                        print(chat_api.send_chat_record(self.chat_record))
+                    except Exception as e:
+                        print(e)
 
                     group_chat_in_one_session = conf().get("group_chat_in_one_session", [])
                     session_id = cmsg.actual_user_id
@@ -95,7 +124,6 @@ class ChatChannel(Channel):
                 context["receiver"] = cmsg.other_user_id
             e_context = PluginManager().emit_event(EventContext(Event.ON_RECEIVE_MESSAGE, {"channel": self, "context": context}))
             context = e_context["context"]
-
             if e_context.is_pass() or context is None:
                 return context
             if cmsg.from_user_id == self.user_id and not config.get("trigger_by_self", True):

@@ -387,6 +387,8 @@ def get_msg(self):
     headers = {
         'ContentType': 'application/json; charset=UTF-8',
         'User-Agent': config.USER_AGENT}
+
+
     r = self.s.post(url, data=json.dumps(data),
                     headers=headers, timeout=config.TIMEOUT)
     dic = json.loads(r.content.decode('utf-8', 'replace'))
