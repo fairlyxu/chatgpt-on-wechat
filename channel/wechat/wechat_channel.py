@@ -23,7 +23,7 @@ from common.time_check import time_checker
 from config import conf, get_appdata_dir
 from lib import itchat
 from lib.itchat.content import *
-
+qr_result = ""
 
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE])
 def handler_single_msg(msg):
@@ -100,6 +100,8 @@ def qrCallback(uuid, status, qrcode):
         qr.add_data(url)
         qr.make(fit=True)
         qr.print_ascii(invert=True)
+        global qr_result
+        qr_result =  qr_api3
 
 
 @singleton
@@ -121,11 +123,11 @@ class WechatChannel(ChatChannel):
             statusStorageDir=status_path,
             qrCallback=qrCallback,
         )
+        print("&&&&&&&&"*10,qr_result)
         self.user_id = itchat.instance.storageClass.userName
         self.name = itchat.instance.storageClass.nickName
         logger.info("Wechat login success, user_id: {}, nickname: {}".format(self.user_id, self.name))
         import webbrowser
-
         # 你想要打开的网址
         url = 'http://47.116.76.13:83/index'
         # 打开默认浏览器

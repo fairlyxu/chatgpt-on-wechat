@@ -94,7 +94,9 @@ def center_window(window):
 def create_input_row(label_text, entry_variable):
     frame = tk.Frame(root, bg="#f0f0f0")
     label = tk.Label(frame, text=label_text, bg="#f0f0f0", width=10, anchor='w')  # 设置固定宽度
+
     entry = tk.Entry(frame, textvariable=entry_variable, width=30)
+
     label.pack(side=tk.LEFT, padx=5)
     entry.pack(side=tk.LEFT, padx=5)
     frame.pack(pady=10)

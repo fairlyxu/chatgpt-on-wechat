@@ -146,6 +146,8 @@ def create_input_row(label_text, entry_variable):
     frame = tk.Frame(root, bg="#f0f0f0")
     label = tk.Label(frame, text=label_text, bg="#f0f0f0", width=10, anchor='w')  # 设置固定宽度
     entry = tk.Entry(frame, textvariable=entry_variable, width=30)
+    #entry = tk.Entry(frame, width=16, borderwidth=0, textvariable=entry_variable, font=('黑体', 16)).place(x=144, y=140)
+
     label.pack(side=tk.LEFT, padx=5)
     entry.pack(side=tk.LEFT, padx=5)
     frame.pack(pady=10)
@@ -178,8 +180,11 @@ def create_login_window():
     # 创建输入框
     entry_username = tk.StringVar()
     create_input_row("用户名：", entry_username)
+
     entry_password = tk.StringVar()
     create_input_row("密码：", entry_password)
+
+
     entry_tenant_id = tk.StringVar()
     create_input_row("租户ID：", entry_tenant_id)
 
