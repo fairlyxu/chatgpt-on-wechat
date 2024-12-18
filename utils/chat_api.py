@@ -9,6 +9,7 @@
 import requests
 import json
 from .APIconfig  import UPLOAD_URL
+import signal
 
 class ChatAPI:
     _instance = None
@@ -29,9 +30,16 @@ class ChatAPI:
             self.initialized = True
 
     def send_chat_record(self, chat_record):
-        response = requests.post(self.url, headers=self.headers, data=json.dumps(chat_record))
+        data = json.dumps(chat_record)
+        response = requests.post(self.url, headers=self.headers, data=data)
+
         if response.status_code == 200:
-            return response.json()
+            data = response.text
+            json_data = json.loads(data)
+            if json_data["code"] == 200:
+                return response.json()
+            else:
+                signal.raise_signal(signal.SIGINT)
         else:
             raise Exception(f"请求失败: {response.status_code}, {response.text}")
 

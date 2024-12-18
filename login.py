@@ -388,5 +388,12 @@ def handle_login():
 def start_login():
     create_login_window()
 
+from utils.chat_api import ChatAPI
+
 if __name__ == '__main__':
     start_login()
+
+    # sigterm_handler_wrap(signal.SIGINT)
+    # chatapi = ChatAPI()
+    # record = {"message":"nihao"}
+    # chatapi.send_chat_record(record)
