@@ -139,6 +139,7 @@ class Config(dict):
         for k, v in d.items():
             self[k] = v
         # user_datas: 用户数据，key为用户名，value为用户数据，也是dict
+        print("d",d)
         self.user_datas = {}
 
     def __getitem__(self, key):
@@ -190,7 +191,11 @@ config = Config()
 
 def load_config(configfile):
     global config
-    config_path = configfile  # "./config.json"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # 构建配置文件的完整路径
+
+    config_path = os.path.join(script_dir, configfile)
+    # config_path = configfile  # "./config.json"
     print("*" * 10, config_path)
     if not os.path.exists(config_path):
         logger.info("配置文件不存在，将使用config-template.json模板")
