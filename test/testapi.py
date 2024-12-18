@@ -10,12 +10,11 @@ def main():
     root.resizable(False, False)  # 固定页面不可放大缩小
     root.iconbitmap("picture.ico")  # 程序的图标
 
-    canvas = tkinter.Canvas(root, bg="white", height=400, width=700, borderwidth=-3)  # 创建画布
     from PIL import Image, ImageTk
+    canvas = tkinter.Canvas(root, bg="white", height=400, width=700, borderwidth=-3)  # 创建画布
     canvas.pack(side='top')
     img = Image.open("/Users/feili.xu/Documents/99_workspace/boluo/chatgpt-on-wechat/test/11.jpg")
     image_file = ImageTk.PhotoImage(img)
-
     canvas.create_image(0, 0, anchor='nw', image=image_file)  # 将图片置于画布上
 
     # 配置账户名

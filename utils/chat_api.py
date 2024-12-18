@@ -8,7 +8,7 @@
 """
 import requests
 import json
-from .APIconfig  import UPLOAD_URL
+from .APIconfig  import UPLOAD_API
 import signal
 
 class ChatAPI:
@@ -21,7 +21,7 @@ class ChatAPI:
 
     def __init__(self, tenant_id="1843853758772498438", auth_token="test-token2"):
         if not hasattr(self, 'initialized'):
-            self.url = UPLOAD_URL
+            self.url = UPLOAD_API
             self.headers = {
                 "tenant-id": tenant_id,
                 "Authorization": f"Bearer {auth_token}",

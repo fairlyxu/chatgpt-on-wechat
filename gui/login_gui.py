@@ -13,13 +13,13 @@ import requests
 from PIL import Image, ImageTk
 import io
 import base64
-from utils.APIconfig import LOGIN_URL,CAPTCHA_URL
+from utils.APIconfig import LOGIN_API,CAPTCHA_API
 
 # 全局变量存储验证码图像和验证码标识
 captcha_image = None
 captcha_tag = ""
-login_url = LOGIN_URL
-captcha_url = CAPTCHA_URL
+login_url = LOGIN_API
+captcha_url = CAPTCHA_API
 
 # 获取验证码
 def get_captcha():
