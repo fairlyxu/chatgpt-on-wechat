@@ -21,7 +21,7 @@ from ..returnvalues import ReturnValue
 from ..storage.templates import wrap_user_dict
 from .contact import update_local_chatrooms, update_local_friends
 from .messages import produce_msg
-
+import signal
 logger = logging.getLogger('itchat')
 
 
@@ -328,6 +328,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 else:
                     time.sleep(1)
         self.logout()
+        signal.raise_signal(signal.SIGINT)
         if hasattr(exitCallback, '__call__'):
             exitCallback()
         else:

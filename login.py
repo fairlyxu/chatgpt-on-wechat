@@ -42,14 +42,18 @@ options_dict = {
 }
 current_option = ''
 text_area = None
-
+login_window_start  =  False
 def sigterm_handler_wrap(_signo):
+    global login_window_start
     old_handler = signal.getsignal(_signo)
 
     def func(_signo, _stack_frame):
         logger.info("signal {} received, exiting...".format(_signo))
         conf().save_user_datas()
-        start_login()
+        if login_window_start:
+            print("登录窗口已启动")
+        else:
+            start_login()
         if callable(old_handler):  #  check old_handler
             return old_handler(_signo, _stack_frame)
         # sys.exit(0)
@@ -188,7 +192,8 @@ def create_captcha_row():
 
 # 封装登录窗口的创建
 def create_login_window():
-    global root, entry_username, entry_password, entry_tenant_id, entry_captcha
+    global root, entry_username, entry_password, entry_tenant_id, entry_captcha,login_window_start
+    login_window_start = True
 
     root = tk.Tk()
     root.title("登录界面")
@@ -369,7 +374,7 @@ def create_config_window():
 
 # 处理登录
 def handle_login():
-    global root
+    global root,login_window_start
     username = entry_username.get()
     password = entry_password.get()
     tenant_id = entry_tenant_id.get()
@@ -380,6 +385,7 @@ def handle_login():
     if success:
         root.quit()  # 退出主循环
         root.destroy()
+        login_window_start = False
         create_config_window()
         #run("../config_lama.json")
     else:
