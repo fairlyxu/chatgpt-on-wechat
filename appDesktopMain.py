@@ -45,7 +45,17 @@ class API:
     # 停止聊天助手
     def stopChat(self,tenantId):
         pass
-
+    
+def toLoginPage():
+    delete_cookie_and_reload("Admin-Token")
+def delete_cookie_and_reload(cookie_name):
+    # 替换为你要删除的 cookie 的名称
+    if cookie_name is None or cookie_name == '':
+        return
+    # 执行 JavaScript 代码删除 cookie
+    window.evaluate_js(f"document.cookie = '{cookie_name}=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';")
+    # 刷新页面
+    window.evaluate_js("location.reload();")
 def main():
     api = API()
     # 获取当前工作目录  
@@ -62,7 +72,7 @@ def main():
     # 2 npm run build 已打包，加载打包后的html
     url = 'desktop_app/desktop_vue_html/dist/index.html'
     url = os.path.join(application_path,url)
-
+    global window
     window = webview.create_window('元芋智能 聊天小助手', url, width=700,height=700,  js_api=api)
     
     # private_mode=False 表示保存cookie,使其在app关掉重启后，依然保存cookie和本地存储
