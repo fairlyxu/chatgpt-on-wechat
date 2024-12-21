@@ -106,7 +106,15 @@ var hasLoadConfig = false;
                     this.$message.error('小助手已启动')
                     return
                 }
-                window.pywebview.api.startChat(this.assistFormData, tenantId).then(response => {
+                if(this.assistFormData.group_chat_prefixStr){
+                
+                }
+                let formdata = {...this.assistFormData}
+                formdata.group_chat_prefix = formdata.group_chat_prefixStr ? formdata.group_chat_prefixStr.split(',') : []
+                formdata.group_name_white_list = formdata.group_name_white_listStr ? formdata.group_name_white_listStr.split(',') : []
+                delete formdata.group_chat_prefixStr
+                delete formdata.group_name_white_listStr
+                window.pywebview.api.startChat(formdata, tenantId).then(response => {
                     this.running = true
                     this.$message.success("启动成功")
                 }).catch(error=>{
