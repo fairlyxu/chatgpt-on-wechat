@@ -9,7 +9,9 @@ from common.log import logger
 from config import conf, load_config
 from plugins import *
 import argparse
-from gui.login_gui import start_login
+# from gui.login_gui import start_login
+
+import appDesktopMain
 
 parser = argparse.ArgumentParser()
 
@@ -60,8 +62,9 @@ def run(configfile=""):
 
 
 if __name__ == "__main__":
-    parser.parse_args()
-    args = parser.parse_args()
-    # 打印定位参数echo
-    print(args.config_file)
-    run(args.config_file)
+    # parser.parse_args()
+    # args = parser.parse_args()
+    # # 打印定位参数echo
+    # print(args.config_file)
+    # run(args.config_file)
+    appDesktopMain.main()
