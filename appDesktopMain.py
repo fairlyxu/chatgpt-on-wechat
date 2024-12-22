@@ -28,6 +28,7 @@ class API:
 
     # 保存配置
     def saveConfig(self,configObj,tenantId):
+        configObj["tenant_id"] = tenantId
         with open('config_' + tenantId + '.json', 'w',encoding='UTF-8') as f:
             # configObj 转成json字符串
             f.write(json.dumps(configObj))

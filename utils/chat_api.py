@@ -10,7 +10,9 @@ import requests
 import json
 from .APIconfig  import UPLOAD_API
 import signal
-
+from config import conf
+tenantId = conf().get("tenantId", "") #"1843853758772498438"
+authToken = conf().get("auth_token", "") #"test-token2"
 class ChatAPI:
     _instance = None
 
@@ -19,7 +21,7 @@ class ChatAPI:
             cls._instance = super(ChatAPI, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, tenant_id="1843853758772498438", auth_token="test-token2"):
+    def __init__(self, tenant_id=tenantId, auth_token=authToken):
         if not hasattr(self, 'initialized'):
             self.url = UPLOAD_API
             self.headers = {

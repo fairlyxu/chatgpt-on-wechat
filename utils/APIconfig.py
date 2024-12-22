@@ -5,7 +5,6 @@
 # Author     ：fairyxu 
 # Description：
 """
-
 BASE_API_SERVER_HOST = "http://47.116.76.13:8082"
 LOGIN_API = f"{BASE_API_SERVER_HOST}/auth/login"
 CAPTCHA_API = f"{BASE_API_SERVER_HOST}/captcha/get"
