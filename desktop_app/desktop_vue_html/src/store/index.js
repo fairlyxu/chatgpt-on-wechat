@@ -13,7 +13,7 @@ const cookieExpires = 30
 
 export function storeLogOut(){
   return new Promise((resolve, reject) => {
-    logout(state.token).then(() => {
+    logout().then(() => {
       setIsLogin(false);
       removeTenantId();
       removeToken()
@@ -53,6 +53,7 @@ export function storeGetUserInfo(){
       setTenantId(user.tenantId)
       resolve(res)
     }).catch(error => {
+      console.log("in get info catch",error)
       reject(error)
     })
   })

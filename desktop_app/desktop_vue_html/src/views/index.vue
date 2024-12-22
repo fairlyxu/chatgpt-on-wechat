@@ -77,13 +77,14 @@
         <div class="footer">
             <el-button :disabled="!running" type="danger" @click="stopRun" icon="el-icon-video-pause">停止</el-button>
             <el-button :disabled="startBtnDisabled || running" type="success" @click="startRun" icon="el-icon-video-play">启动</el-button>
+            <!--<el-button type="danger" @click="toLoginPage" icon="el-icon-video-pause">退出登录</el-button>-->
         </div>
     </el-container>
    
 </template>
 
 <script>
-import { getTenantId } from '@/store'
+import { getTenantId , getToken, storeGetUserInfo , storeLogOut  } from '@/store'
 const tenantId = getTenantId()
 var hasLoadConfig = false;
     export default {
@@ -92,12 +93,30 @@ var hasLoadConfig = false;
             return {
                 defaultActive: 1,
                 activeIndex: this.defaultActive,
-                assistFormData:{}, //表单数据
+                assistFormData:{
+                    group_msg_switch:false
+                }, //表单数据
                 startBtnDisabled:true,//启动按钮是否禁用
                 running:false,//是否已启动小助手
             }
         },
         methods:{
+            toLoginPage(){
+                window.pywebview.api.toLoginPage().then().catch(error=>{
+                })
+            },
+            //验证token是否过期
+            checkToken(){
+                return new Promise((resolve, reject) => {
+                     // 获取用户信息，验证token是否过期
+                    storeGetUserInfo().then(res => {
+                        resolve(res)
+                    }).catch(error => {
+                        reject(error)
+                    })
+                })
+             
+            },
             handleSelect(index, indexPath) {
                 this.activeIndex = index
             },
@@ -106,21 +125,22 @@ var hasLoadConfig = false;
                     this.$message.error('小助手已启动')
                     return
                 }
-                if(this.assistFormData.group_chat_prefixStr){
-                
-                }
-                let formdata = {...this.assistFormData}
-                formdata.group_chat_prefix = formdata.group_chat_prefixStr ? formdata.group_chat_prefixStr.split(',') : []
-                formdata.group_name_white_list = formdata.group_name_white_listStr ? formdata.group_name_white_listStr.split(',') : []
-                delete formdata.group_chat_prefixStr
-                delete formdata.group_name_white_listStr
-                window.pywebview.api.startChat(formdata, tenantId).then(response => {
+                //启动之前判断token是否失效
+                this.checkToken().then(()=>{
+                    let formdata = {...this.assistFormData}
+                    formdata.group_chat_prefix = formdata.group_chat_prefixStr ? formdata.group_chat_prefixStr.split(',') : []
+                    formdata.group_name_white_list = formdata.group_name_white_listStr ? formdata.group_name_white_listStr.split(',') : []
+                    delete formdata.group_chat_prefixStr
+                    delete formdata.group_name_white_listStr
                     this.running = true
-                    this.$message.success("启动成功")
+                    window.pywebview.api.startChat(formdata, tenantId,getToken()).then(response => {
+                    }).catch(error=>{
+                        this.running = false
+                        this.$message.error("启动失败：" + error)
+                    })
                 }).catch(error=>{
-                    console.error(error)
-                    this.$message.error(error)
                 })
+                
             },
             stopRun(){//停止
                 window.pywebview.api.stopChat( tenantId).then(response => {           
@@ -173,10 +193,11 @@ var hasLoadConfig = false;
             },
         },
         created(){
-            console.log('created')
-            window.addEventListener('pywebviewready', this.pywebviewReadyListener)
-            this.handleSelect(this.defaultActive, '')
-            this.loadConfig()
+            this.checkToken().then(()=>{
+                window.addEventListener('pywebviewready', this.pywebviewReadyListener)
+                this.handleSelect(this.defaultActive, '')
+                this.loadConfig()
+            }).catch(()=>{})
         },
         //页面卸载
         beforeDestroy(){

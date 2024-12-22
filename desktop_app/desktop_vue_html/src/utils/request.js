@@ -5,6 +5,8 @@ import {getTenantId,storeLogOut , getToken} from '@/store'
 import errorCode from '@/utils/errorCode'
 import { tansParams, blobValidate } from "@/utils/ruoyi";
 import cache from '@/plugins/cache'
+import router from '@/router'
+
 // import { saveAs } from 'file-saver'
 
 let downloadLoadingInstance;
@@ -105,20 +107,22 @@ service.interceptors.response.use(res => {
       return res.data
     }
     if (code === 401) {
+      console.log("in request.js 401 before",res.config.url)
       if (!isRelogin.show) {
         isRelogin.show = true;
-        MessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
+        MessageBox.alert('登录状态已过期，需重新登录', '系统提示', { showClose:false, confirmButtonText: '重新登录', type: 'warning' }).then(() => {
           isRelogin.show = false;
-          // store.dispatch('LogOut').then(() => {
-          //   location.href = '/index';
-          // })
           storeLogOut(()=>{
-            location.href = '/index';
+            router.push('/login')
+          }).catch(error=>{
+            console.log("in request.js storeLogOut catch",error)
+            router.push('/login')
           })
         }).catch(() => {
           isRelogin.show = false;
         });
       }
+      console.log("in request.js 401 after,before return Promise",res.config.url)
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (code === 500) {
       Message({ message: msg, type: 'error' })

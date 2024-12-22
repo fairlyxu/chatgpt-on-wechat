@@ -11,7 +11,7 @@ import json
 from .APIconfig  import UPLOAD_API
 import signal
 from config import conf
-tenantId = conf().get("tenantId", "") #"1843853758772498438"
+tenantId = conf().get("tenant_id", "") #"1843853758772498438"
 authToken = conf().get("auth_token", "") #"test-token2"
 class ChatAPI:
     _instance = None

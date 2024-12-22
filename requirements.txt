@@ -8,3 +8,4 @@ Pillow
 pre-commit
 web.py
 pywebview==5.2
+itchat
