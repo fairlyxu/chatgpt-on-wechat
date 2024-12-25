@@ -50,13 +50,12 @@ class API:
             raise Exception('启动失败，请检查配置文件是否正确')
     
     # 停止聊天助手
-    def stopChat(self, tenantId):
+    def stopChat(self,tenantId):
         print("停止聊天助手")
         # 停止服务的逻辑
         try:
-            from app import asistant_stop  # 引入停止函数
-            stop_asistant()  # 调用停止函数
-            #os.kill(os.getpid(), signal.SIGTERM)  # 发送终止信号
+            from app import asistant_stop
+            stop_asistant()
             return ApiResult(200, True, '服务已停止')
         except Exception as e:
             return ApiResult(500, False, '停止服务失败: ' + str(e))
