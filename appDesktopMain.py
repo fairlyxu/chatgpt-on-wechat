@@ -3,8 +3,9 @@
 import webview
 import os
 import sys
-from app import run # 聊天小助手
+from app import run, stop_asistant  # 聊天小助手
 import json
+import signal
 
 # 返回数据格式
 
@@ -49,8 +50,17 @@ class API:
             raise Exception('启动失败，请检查配置文件是否正确')
     
     # 停止聊天助手
-    def stopChat(self,tenantId):
-        pass
+    def stopChat(self, tenantId):
+        print("停止聊天助手")
+        # 停止服务的逻辑
+        try:
+            from app import asistant_stop  # 引入停止函数
+            stop_asistant()  # 调用停止函数
+            #os.kill(os.getpid(), signal.SIGTERM)  # 发送终止信号
+            return ApiResult(200, True, '服务已停止')
+        except Exception as e:
+            return ApiResult(500, False, '停止服务失败: ' + str(e))
+
 
     def toLoginPage(self):
         toLoginPage()

@@ -3,21 +3,16 @@
 import os
 import signal
 import sys
-
 from channel import channel_factory
-from common.log import logger
 from config import conf, load_config
 from plugins import *
 import argparse
-# from gui.login_gui import start_login
 
 import appDesktopMain
+asistant_running = True  # 控制 run 函数的执行
 
 parser = argparse.ArgumentParser()
-
 parser.add_argument('--config_file', type=str, help='配置文件目录', default="config.json")
-
-
 def sigterm_handler_wrap(_signo):
     old_handler = signal.getsignal(_signo)
 
@@ -32,6 +27,7 @@ def sigterm_handler_wrap(_signo):
 
 
 def run(configfile=""):
+    global asistant_running
     try:
         # load config
         load_config(configfile)
@@ -53,13 +49,15 @@ def run(configfile=""):
         channel = channel_factory.create_channel(channel_name)
         if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework"]:
             PluginManager().load_plugins()
-
-        # startup channel
-        channel.startup()
+        while asistant_running:  # 修改为循环，检查是否应该继续
+            channel.startup()
     except Exception as e:
         logger.error("App startup failed!")
         logger.exception(e)
 
+def stop_asistant():
+    global asistant_running
+    asistant_running = False
 
 if __name__ == "__main__":
     # parser.parse_args()
