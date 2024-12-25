@@ -14,28 +14,29 @@
                 <el-form ref="assistForm" :model="assistFormData" class="assist-form">
                     <div id="menu1" v-show="activeIndex == 1">
                     
-                        <el-form-item prop="group_chat_prefixStr"  label="群列表(请用逗号分割)">
+                        
+                        <el-form-item prop="group_name_white_listStr"  label="群列表">
                             <el-input
-                            v-model="assistFormData.group_chat_prefixStr"
+                            v-model="assistFormData.group_name_white_listStr"
                             type="text"
                             auto-complete="off"
                             placeholder="群列表(请用逗号分割)">
                         </el-input>
                         </el-form-item>
-                        <el-form-item prop="group_name_white_listStr"  label="共享会话群列表">
+                        <el-form-item prop="group_chat_in_one_sessionStr"  label="共享会话群列表">
                             <el-input
-                            v-model="assistFormData.group_name_white_listStr"
+                            v-model="assistFormData.group_chat_in_one_sessionStr"
                             type="text"
                             auto-complete="off"
-                            placeholder="共享会话群列表">
+                            placeholder="共享会话群列表(请用逗号分割)">
                         </el-input>
                         </el-form-item>
-                        <el-form-item prop="group_chat_in_one_session"  label="触发关键词">
+                        <el-form-item prop="group_chat_prefixStr"  label="触发关键词">
                             <el-input
-                            v-model="assistFormData.group_chat_in_one_session"
+                            v-model="assistFormData.group_chat_prefixStr"
                             type="text"
                             auto-complete="off"
-                            placeholder="触发关键词">
+                            placeholder="触发关键词(请用逗号分割)">
                         </el-input>
                         </el-form-item>
                         <el-form-item prop="character_desc"  label="群助手角色描述">
@@ -130,8 +131,10 @@ var hasLoadConfig = false;
                     let formdata = {...this.assistFormData}
                     formdata.group_chat_prefix = formdata.group_chat_prefixStr ? formdata.group_chat_prefixStr.split(',') : []
                     formdata.group_name_white_list = formdata.group_name_white_listStr ? formdata.group_name_white_listStr.split(',') : []
+                    formdata.group_chat_in_one_session = formdata.group_chat_in_one_sessionStr ? formdata.group_chat_in_one_sessionStr.split(',') : []
                     delete formdata.group_chat_prefixStr
                     delete formdata.group_name_white_listStr
+                    delete formdata.group_chat_in_one_sessionStr
                     this.running = true
                     window.pywebview.api.startChat(formdata, tenantId,getToken()).then(response => {
                     }).catch(error=>{
@@ -170,16 +173,24 @@ var hasLoadConfig = false;
                         //     return
                         // }
                         hasLoadConfig = true
-                        this.assistFormData = response.data
+                        let data = response.data
                         //数据格式化
-                        this.assistFormData.group_chat_prefixStr = ""
-                        if(this.assistFormData.group_chat_prefix){
-                            this.assistFormData.group_chat_prefixStr = this.assistFormData.group_chat_prefix.join(",")
+                        data.group_chat_prefixStr = ""
+                        if(data.group_chat_prefix){
+                            data.group_chat_prefixStr = data.group_chat_prefix.join(",")
                         }
-                        this.assistFormData.group_name_white_listStr = ""
-                        if(this.assistFormData.group_name_white_list){
-                            this.assistFormData.group_name_white_listStr = this.assistFormData.group_name_white_list.join(",")
+                        data.group_name_white_listStr = ""
+                        if(data.group_name_white_list){
+                            data.group_name_white_listStr = data.group_name_white_list.join(",")
                         }
+                        data.group_chat_in_one_sessionStr = ""
+                        if(data.group_chat_in_one_session){
+                            data.group_chat_in_one_sessionStr = data.group_chat_in_one_session.join(",")
+                        }
+                        if(data.group_msg_switch == null || data.group_msg_switch == undefined){
+                            data.group_msg_switch = false
+                        }
+                        this.assistFormData = data
                         this.startBtnDisabled = false
                         this.$message.success("加载配置成功")
                     }).catch(error=>{
