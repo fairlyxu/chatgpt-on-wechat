@@ -16,7 +16,6 @@ parser.add_argument('--config_file', type=str, help='配置文件目录', defaul
 
 def sigterm_handler_wrap(_signo):
     old_handler = signal.getsignal(_signo)
-
     def func(_signo, _stack_frame):
         logger.info("signal {} received, exiting...".format(_signo))
         conf().save_user_datas()
@@ -25,11 +24,6 @@ def sigterm_handler_wrap(_signo):
         sys.exit(0)
 
     signal.signal(_signo, func)
-
-
-def stop_asistant():
-    global asistant_running
-    asistant_running = False
 
 
 def run(configfile=""):
@@ -55,7 +49,6 @@ def run(configfile=""):
         channel = channel_factory.create_channel(channel_name)
         if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework"]:
             PluginManager().load_plugins()
-        while asistant_running:  # 修改为循环，检查是否应该继续
             channel.startup()
     except Exception as e:
         logger.error("App startup failed!")

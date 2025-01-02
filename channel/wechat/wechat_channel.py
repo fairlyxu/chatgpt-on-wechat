@@ -1,9 +1,7 @@
 # encoding:utf-8
-
 """
 wechat channel
 """
-
 import io
 import json
 import os
@@ -74,7 +72,6 @@ def qrCallback(uuid, status, qrcode):
     if status == "0":
         try:
             from PIL import Image
-
             img = Image.open(io.BytesIO(qrcode))
             _thread = threading.Thread(target=img.show, args=("QRCode",))
             _thread.setDaemon(True)
@@ -114,8 +111,6 @@ class WechatChannel(ChatChannel):
         self.active = True
 
     def startup(self):
-
-
         itchat.instance.receivingRetryCount = 600  # 修改断线超时时间
         # login by scan QRCode
         hotReload = conf().get("hot_reload", False)
@@ -127,16 +122,12 @@ class WechatChannel(ChatChannel):
             statusStorageDir=status_path,
             qrCallback=qrCallback,
         )
-        print("&&&&&&&&"*10,qr_result)
         self.user_id = itchat.instance.storageClass.userName
         self.name = itchat.instance.storageClass.nickName
         logger.info("Wechat login success, user_id: {}, nickname: {}".format(self.user_id, self.name))
         import webbrowser
-        # 你想要打开的网址
-        url = 'http://47.116.76.13:83/index'
-        # 打开默认浏览器
-        webbrowser.open(url)
-        # start message listener
+        #url = 'http://47.116.76.13:83/index'
+        #webbrowser.open(url)
         itchat.run()
 
     # handle_* 系列函数处理收到的消息后构造Context，然后传入produce函数中处理Context和发送回复
