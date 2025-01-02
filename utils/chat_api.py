@@ -9,7 +9,7 @@
 import requests
 import json
 from .APIconfig  import UPLOAD_API
-import signal
+
 from config import conf
 tenantId = conf().get("tenant_id", "") #"1843853758772498438"
 authToken = conf().get("auth_token", "") #"test-token2"
@@ -34,15 +34,13 @@ class ChatAPI:
     def send_chat_record(self, chat_record):
         data = json.dumps(chat_record)
         response = requests.post(self.url, headers=self.headers, data=data)
-
         if response.status_code == 200:
             data = response.text
             json_data = json.loads(data)
             if json_data["code"] == 200:
                 return response.json()
-            else:
-                signal.raise_signal(signal.SIGINT)
         else:
+            #print("请求失败: {0}, {1}".format(response.status_code, response.text))
             raise Exception(f"请求失败: {response.status_code}, {response.text}")
 
 # 全局实例

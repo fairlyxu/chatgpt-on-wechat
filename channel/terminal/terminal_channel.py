@@ -1,4 +1,6 @@
 import sys
+import traceback
+from traceback import print_stack
 
 from bridge.context import *
 from bridge.reply import Reply, ReplyType
@@ -69,7 +71,8 @@ class TerminalChannel(ChatChannel):
         while True:
             try:
                 prompt = self.get_input()
-            except KeyboardInterrupt:
+            except Exception as e:
+                traceback.print_stack()
                 print("\nExiting...")
                 sys.exit()
             msg_id += 1

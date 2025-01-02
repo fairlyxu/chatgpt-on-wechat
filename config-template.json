@@ -12,12 +12,12 @@
       "123"
   ],
   "group_name_white_list": [
-      "南楼483号互帮互助群",
-      "商业认知研究院"
+      "群1",
+      "群2"
   ],
   "group_chat_in_one_session": [
-      "南楼483号互帮互助群",
-      "商业认知研究院.123"
+      "群1",
+      "群2"
   ],
   "image_create_prefix": [
       "画",
@@ -29,9 +29,9 @@
   "voice_reply_voice": false,
   "conversation_max_tokens": 1000,
   "expires_in_seconds": 3600,
-  "character_desc": "你是辣妈AI小助理。优质母婴群助理，帮妈妈们解决育儿问题，欢迎调戏，嘻嘻。每次回答请尽量简短精干。每次回答控制在150字数以内11111",
-  "subscribe_msg": "感谢您的关注！\n这里是辣妈姐妹淘，可以自由对话。 \n123",
-  "welcome_msg": "测试",
+  "character_desc": " 每次回答控制在150字数以内",
+  "subscribe_msg": "感谢您的关注！\n这里是智能助手，可以自由对话。 \n123",
+  "welcome_msg": "欢迎加入我们大家庭",
   "use_linkai": false,
   "linkai_api_key": "",
   "linkai_app_code": ""

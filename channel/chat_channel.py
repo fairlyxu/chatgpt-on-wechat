@@ -2,6 +2,7 @@ import os
 import re
 import threading
 import time
+import traceback
 from asyncio import CancelledError
 from concurrent.futures import Future, ThreadPoolExecutor
 
@@ -50,9 +51,9 @@ class ChatChannel(Channel):
 
     # 根据消息构造context，消息内容相关的触发项写在这里
     def _compose_context(self, ctype: ContextType, content, **kwargs):
-        print("ctype:", ctype, "content:", content)
-        print("kwargs:", kwargs)
-        print("uid:",self.user_id)
+        #print("ctype:", ctype, "content:", content)
+        #print("kwargs:", kwargs)
+        #print("uid:",self.user_id)
 
         context = Context(ctype, content)
         context.kwargs = kwargs
@@ -82,7 +83,7 @@ class ChatChannel(Channel):
                         check_contain(group_name, group_name_keyword_white_list),
                     ]
                 ):
-                    print("---" * 10, "这是群消息:", "---" * 10,cmsg.create_time)
+                    #print("---" * 10, "这是群消息:", "---" * 10,cmsg.create_time)
                     self.chat_record['wxTs'] = cmsg.create_time
                     self.chat_record['wxChatId'] = cmsg.msg_id
                     self.chat_record['fromUserNickname'] = cmsg.actual_user_nickname
@@ -95,12 +96,11 @@ class ChatChannel(Channel):
                         self.chat_record['isAns'] = 1
                     else:
                         self.chat_record['isAns'] = 0
-
-                    print("cmsg: ", self.chat_record)
+                    #print("cmsg: ", self.chat_record)
                     try:
-                        print(chat_api.send_chat_record(self.chat_record))
-                    except Exception as e:
-                        print(e)
+                       chat_api.send_chat_record(self.chat_record)
+                    except Exception  :
+                        logger.error(traceback.print_exc())
 
                     group_chat_in_one_session = conf().get("group_chat_in_one_session", [])
                     session_id = cmsg.actual_user_id
@@ -116,10 +116,10 @@ class ChatChannel(Channel):
                 context["session_id"] = session_id
                 context["receiver"] = group_id
             else:
-                print("---" * 10, "这是单聊消息:","---" * 10,cmsg.create_time)
-                print("id:", cmsg.msg_id, " from_user_nickname:", cmsg.from_user_nickname)
-                print("ctype:", cmsg.ctype)
-                print("content:", cmsg.content)
+                # print("---" * 10, "这是单聊消息:","---" * 10,cmsg.create_time)
+                # print("id:", cmsg.msg_id, " from_user_nickname:", cmsg.from_user_nickname)
+                # print("ctype:", cmsg.ctype)
+                # print("content:", cmsg.content)
                 context["session_id"] = cmsg.other_user_id
                 context["receiver"] = cmsg.other_user_id
             e_context = PluginManager().emit_event(EventContext(Event.ON_RECEIVE_MESSAGE, {"channel": self, "context": context}))

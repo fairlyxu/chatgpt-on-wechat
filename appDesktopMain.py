@@ -1,19 +1,22 @@
 # import wx
 # app = wx.App()
+import logging
 import webview
-import os
 import sys
-from app import run, stop_asistant  # 聊天小助手
 import json
-import signal
+import subprocess
+import os
+current_file = __file__
+current_dir = os.path.dirname(os.path.abspath(current_file))
 
 # 返回数据格式
-
+start_shell_script_path = f"{current_dir}/start.sh"
+stop_shell_script_path = f"{current_dir}/shutdown.sh"
+restart_shell_script_path = f"{current_dir}/restart.sh"
 def ApiResult(code,data,message):
     return {'data':data,'code':code,'message':message}
 
 class API:
-
     # 加载配置文件
     def loadConfig(self,tenantId):
         filename = 'config_' + tenantId + '.json'
@@ -44,23 +47,58 @@ class API:
         if not os.path.exists(filename):# 如默认配置文件不存在，则报错
             raise Exception('配置文件不存在')
         try:
-            run(filename)
+            process = subprocess.Popen([start_shell_script_path, filename],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode == 0:
+                logging.Logger("asistant_process 启动成功")
+            else:
+                logging.Logger("asistant_process 发生错误:", stderr.decode())
             return ApiResult(200, True, 'success')
         except Exception as e:
             raise Exception('启动失败，请检查配置文件是否正确')
+        except subprocess.CalledProcessError as e:
+            print(f"脚本执行失败，返回码: {e.returncode}")
+            print("错误输出：", e.stderr)
     
     # 停止聊天助手
-    def stopChat(self,tenantId):
+    def stopChat(self):
         print("停止聊天助手")
-        # 停止服务的逻辑
         try:
-            from app import asistant_stop
-            stop_asistant()
+            process = subprocess.Popen([stop_shell_script_path],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode == 0:
+                logging.Logger("asistant_process 启动成功")
+            else:
+                logging.Logger("asistant_process 发生错误:", stderr.decode())
             return ApiResult(200, True, '服务已停止')
         except Exception as e:
             return ApiResult(500, False, '停止服务失败: ' + str(e))
 
+    def restart(self,tenantId):
+        print("重启聊天助手")
+        filename = 'config_' + tenantId + '.json'
+        if not os.path.exists(filename):
+            raise Exception('配置文件不存在')
+        try:
+            process = subprocess.Popen([restart_shell_script_path , filename],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode == 0:
+                logging.Logger("asistant_process 重启成功")
+            else:
+                logging.Logger("asistant_process 重启成功发生错误:", stderr.decode())
 
+            return ApiResult(200, True, 'success')
+        except Exception as e:
+            raise Exception('启动失败，请检查配置文件是否正确')
+        except subprocess.CalledProcessError as e:
+            print(f"脚本执行失败，返回码: {e.returncode}")
+            print("错误输出：", e.stderr)
     def toLoginPage(self):
         toLoginPage()
     
