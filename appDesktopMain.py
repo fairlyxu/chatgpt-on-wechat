@@ -10,9 +10,9 @@ current_file = __file__
 current_dir = os.path.dirname(os.path.abspath(current_file))
 
 # 返回数据格式
-start_shell_script_path = f"{current_dir}/start.sh"
-stop_shell_script_path = f"{current_dir}/shutdown.sh"
-restart_shell_script_path = f"{current_dir}/restart.sh"
+start_shell_script_path = f"{current_dir}/start_asistant.sh"
+stop_shell_script_path = f"{current_dir}/shutdown_asistant.sh"
+restart_shell_script_path = f"{current_dir}/restart_asistant.sh"
 def ApiResult(code,data,message):
     return {'data':data,'code':code,'message':message}
 
