@@ -58,7 +58,7 @@ class API:
             self.process = subprocess.Popen(args)
             print(f"{self.script_name} started with PID {self.process.pid}")
 
-    def stopChat_v2(self,tenantId):
+    def stopChat(self,tenantId):
         if self.is_running():
             print(f"Stopping {self.script_name}")
             self.process.send_signal(signal.SIGINT)  # 发送中断信号给子进程
@@ -100,7 +100,7 @@ class API:
             print("错误输出：", e.stderr)
     
     # 停止聊天助手
-    def stopChat(self,tenantId):
+    def stopChatv0(self,tenantId):
         print("停止聊天助手")
         try:
             process = subprocess.Popen([stop_shell_script_path],
@@ -118,25 +118,7 @@ class API:
 
     def restart(self,tenantId):
         print("重启聊天助手")
-        filename = 'config_' + tenantId + '.json'
-        if not os.path.exists(filename):
-            raise Exception('配置文件不存在')
-        try:
-            process = subprocess.Popen([restart_shell_script_path , filename],
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode == 0:
-                logging.Logger("asistant_process 重启成功")
-            else:
-                logging.Logger("asistant_process 重启成功发生错误:", stderr.decode())
 
-            return ApiResult(200, True, 'success')
-        except Exception as e:
-            raise Exception('启动失败，请检查配置文件是否正确')
-        except subprocess.CalledProcessError as e:
-            print(f"脚本执行失败，返回码: {e.returncode}")
-            print("错误输出：", e.stderr)
     def toLoginPage(self):
         toLoginPage()
     
