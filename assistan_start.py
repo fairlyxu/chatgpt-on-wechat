@@ -7,12 +7,14 @@ from channel import channel_factory
 from config import load_config
 from plugins import *
 
-asistant_running = True  # 控制 run 函数的执行
-
 parser = argparse.ArgumentParser()
-parser.add_argument('--config_file', type=str, help='配置文件目录', default="config.json")
+parser.add_argument('--config_file', type=str, help='配置文件目录', default="config-template.json")
 
 
+def handle_sigterm(signum, frame):
+    conf().save_user_datas()
+    print("Received SIGTERM signal. Shutting down gracefully...")
+    sys.exit(0)
 
 def sigterm_handler_wrap(_signo):
     old_handler = signal.getsignal(_signo)
@@ -27,10 +29,11 @@ def sigterm_handler_wrap(_signo):
 
 
 def run(configfile=""):
-    global asistant_running
     try:
         # load config
         load_config(configfile)
+        # 注册SIGTERM处理器，以便优雅地关闭
+        #signal.signal(signal.SIGTERM, handle_sigterm)
         # ctrl + c
         #sigterm_handler_wrap(signal.SIGINT)
         # kill signal
@@ -41,7 +44,6 @@ def run(configfile=""):
 
         if "--cmd" in sys.argv:
             channel_name = "terminal"
-
         if channel_name == "wxy":
             os.environ["WECHATY_LOG"] = "warn"
             # os.environ['WECHATY_PUPPET_SERVICE_ENDPOINT'] = '127.0.0.1:9001'
@@ -58,8 +60,9 @@ def run(configfile=""):
 
 if __name__ == "__main__":
     print("asistant is starting...")
-    parser.parse_args()
-    args = parser.parse_args()
-    # 打印定位参数echo
-    print("asistant args.config_file",args.config_file)
-    run(args.config_file)
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+    else:
+        config_file = "config-template.json"
+
+    run(config_file)
