@@ -2,7 +2,7 @@
 
 
 # 查找并终止所有名为 assistan_start.py 的进程
-pids=$(ps aux | grep '[a]ssistan_start.py' | awk '{print $2}')
+pids=$(ps aux | grep 'assistan_start.py' | awk '{print $2}')
 
 if [ -z "$pids" ]; then
     echo "没有找到正在运行的 assistan_start.py 进程。" | tee -a $LOG_FILE

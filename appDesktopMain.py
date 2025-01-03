@@ -63,7 +63,7 @@ class API:
             print("错误输出：", e.stderr)
     
     # 停止聊天助手
-    def stopChat(self):
+    def stopChat(self,tenantId):
         print("停止聊天助手")
         try:
             process = subprocess.Popen([stop_shell_script_path],
