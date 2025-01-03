@@ -77,7 +77,9 @@
         </el-container>
         <div class="footer">
             <el-button :disabled="!running" type="danger" @click="stopRun" icon="el-icon-video-pause">停止</el-button>
-            <el-button :disabled="startBtnDisabled || running" type="success" @click="startRun" icon="el-icon-video-play">启动</el-button>
+            <!-- <el-button :disabled="startBtnDisabled || running" type="success" @click="startRun" icon="el-icon-video-play">启动</el-button> -->
+            <el-button :disabled="startBtnDisabled || running" v-show="!running" type="success" @click="startRun" icon="el-icon-video-play">启动</el-button>
+            <el-button v-show="running" type="success" @click="reStartRun" icon="el-icon-video-play">重新加载</el-button>
             <!--<el-button type="danger" @click="toLoginPage" icon="el-icon-video-pause">退出登录</el-button>-->
         </div>
     </el-container>
@@ -85,6 +87,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import { getTenantId , getToken, storeGetUserInfo , storeLogOut  } from '@/store'
 const tenantId = getTenantId()
 var hasLoadConfig = false;
@@ -99,6 +102,7 @@ var hasLoadConfig = false;
                 }, //表单数据
                 startBtnDisabled:true,//启动按钮是否禁用
                 running:false,//是否已启动小助手
+                isReStarting: false , //是否正在重新加载
             }
         },
         methods:{
@@ -121,11 +125,12 @@ var hasLoadConfig = false;
             handleSelect(index, indexPath) {
                 this.activeIndex = index
             },
-            startRun(){//启动
+            startRun:_.debounce(function(){//启动
                 if(this.running){
                     this.$message.error('小助手已启动')
                     return
                 }
+                console.log("正在启动")
                 //启动之前判断token是否失效
                 this.checkToken().then(()=>{
                     let formdata = {...this.assistFormData}
@@ -144,8 +149,37 @@ var hasLoadConfig = false;
                 }).catch(error=>{
                 })
                 
-            },
-            stopRun(){//停止
+            },300),
+            reStartRun:_.debounce(function(){//重新加载
+                if(!this.running){
+                    this.$message.error('小助手未启动，请点击启动按钮')
+                    return
+                }
+                console.log("正在重新加载")
+                this.isReStarting = true
+                //启动之前判断token是否失效
+                this.checkToken().then(()=>{
+                    let formdata = {...this.assistFormData}
+                    formdata.group_chat_prefix = formdata.group_chat_prefixStr ? formdata.group_chat_prefixStr.split(',') : []
+                    formdata.group_name_white_list = formdata.group_name_white_listStr ? formdata.group_name_white_listStr.split(',') : []
+                    formdata.group_chat_in_one_session = formdata.group_chat_in_one_sessionStr ? formdata.group_chat_in_one_sessionStr.split(',') : []
+                    delete formdata.group_chat_prefixStr
+                    delete formdata.group_name_white_listStr
+                    delete formdata.group_chat_in_one_sessionStr
+                    this.running = true
+                    window.pywebview.api.restart(tenantId).then(response => {
+                    }).catch(error=>{
+                        // this.running = false
+                        this.$message.error("重新加载失败：" + error)
+                    }).finally(()=>{
+                        this.isReStarting = false
+                    })
+                }).catch(error=>{
+                    this.isReStarting = false
+                })
+            },300),
+            stopRun:_.debounce(function(){//停止
+                console.log("正在停止")
                 window.pywebview.api.stopChat( tenantId).then(response => {           
                     this.$message.success("成功停止")
                     this.running = false
@@ -154,7 +188,7 @@ var hasLoadConfig = false;
                     console.error(error)
                     this.$message.error(error)
                 })
-            },
+            },300),
             pywebviewReadyListener(){
                 console.log("pywebviewReady")
                 this.loadConfig()

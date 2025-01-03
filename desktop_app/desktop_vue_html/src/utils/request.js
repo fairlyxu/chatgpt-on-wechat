@@ -112,6 +112,10 @@ service.interceptors.response.use(res => {
         isRelogin.show = true;
         MessageBox.alert('登录状态已过期，需重新登录', '系统提示', { showClose:false, confirmButtonText: '重新登录', type: 'warning' }).then(() => {
           isRelogin.show = false;
+          if(res.config.url == "/auth/logout"){//如果是退出登录请求返回了401，则不继续请求退出登录，而是直接跳转到登录页
+            router.push('/login')
+            return 
+          }
           storeLogOut(()=>{
             router.push('/login')
           }).catch(error=>{

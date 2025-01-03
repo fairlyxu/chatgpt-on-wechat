@@ -9,6 +9,9 @@ import os
 current_file = __file__
 current_dir = os.path.dirname(os.path.abspath(current_file))
 
+# 获取当前脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 # 返回数据格式
 start_shell_script_path = f"{current_dir}/start_asistant.sh"
 stop_shell_script_path = f"{current_dir}/shutdown_asistant.sh"
@@ -22,7 +25,7 @@ class API:
         filename = 'config_' + tenantId + '.json'
         # 判断文件是否存在，如不存在，则加载config-template.json默认配置文件
         if not os.path.exists(filename):
-            filename = 'config-template.json'
+            filename = os.path.join(script_dir, 'config-template.json')
         if not os.path.exists(filename):# 如默认配置文件不存在，则报错
             raise Exception('配置文件不存在，且无默认配置文件')
         # utf-8格式读取文件内容
@@ -126,7 +129,7 @@ def main():
     # 1 页面还没打包时npm run build
     #url = 'http://localhost:8080' #开发时需要调页面代码时 使用： 必须在desktop_app下的desktop_vue_html 以 npm run serve命令启动vue项目后
     # 2 npm run build 已打包，加载打包后的html
-    url = 'desktop_app/desktop_vue_html/dist/index.html'
+    url = 'desktop_app/desktop_vue_html/dist/index.html?time=2' # time=2用于清除上次的浏览器页面缓存
     url = os.path.join(application_path,url)
     global window
     window = webview.create_window('元芋智能 聊天小助手', url, width=700,height=700,  js_api=api)
