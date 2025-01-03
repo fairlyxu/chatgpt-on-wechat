@@ -51,7 +51,7 @@ def run(configfile=""):
         channel = channel_factory.create_channel(channel_name)
         if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework"]:
             PluginManager().load_plugins()
-        channel.startup()
+        #channel.startup()
     except Exception as e:
         logger.error("App startup failed!")
         logger.exception(e)

@@ -35,7 +35,7 @@ class API:
         self.config_file = 'config_' + tenantId + '.json'
         # 判断文件是否存在，如不存在，则加载config-template.json默认配置文件
         if not os.path.exists(self.config_file):
-            filename = 'config-template.json'
+            self.config_file = 'config-template.json'
         if not os.path.exists(self.config_file):  # 如默认配置文件不存在，则报错
             raise Exception('配置文件不存在，且无默认配置文件')
         # utf-8格式读取文件内容
