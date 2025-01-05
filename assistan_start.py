@@ -6,6 +6,7 @@ import argparse
 from channel import channel_factory
 from config import load_config
 from plugins import *
+from channel.wechat.wechat_channel import WechatChannel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config_file', type=str, help='配置文件目录', default="config-template.json")
@@ -51,11 +52,20 @@ def run(configfile=""):
         channel = channel_factory.create_channel(channel_name)
         if channel_name in ["wx", "wxy", "terminal", "wechatmp", "wechatmp_service", "wechatcom_app", "wework"]:
             PluginManager().load_plugins()
-        #channel.startup()
+        channel.startup()
     except Exception as e:
         logger.error("App startup failed!")
         logger.exception(e)
 
+
+# 获取当前工作目录
+if getattr(sys, 'frozen', False):
+    # If the application is run as a bundle, the PyInstaller bootloader
+    # extends the sys module by a flag frozen=True and sets the app
+    # path into variable _MEIPASS'.
+    application_path = sys._MEIPASS
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
 
 
 if __name__ == "__main__":
@@ -63,6 +73,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         config_file = sys.argv[1]
     else:
-        config_file = "config-template.json"
+        config_file = os.path.join(application_path,"config-template.json")
 
     run(config_file)
