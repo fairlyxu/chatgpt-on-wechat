@@ -33,7 +33,9 @@ start_shell_script_path = os.path.join(application_path,'start_asistant.sh')
 stop_shell_script_path = os.path.join(application_path,"shutdown_asistant.sh")
 restart_shell_script_path = os.path.join(application_path,"restart_asistant.sh")
 
-script_name = os.path.join(application_path,"assistan_start.py")
+script_name = os.path.join(application_path,"assistant")
+if os.name == 'nt':  # Windows系统
+    script_name = os.path.join(application_path,"assistant.exe")
 
 
 def ApiResult(code, data, message):
@@ -48,7 +50,7 @@ class API:
         self.config_file = ""
         self.process = None
         #self.script_name = os.path.join(application_path,"assistan_start.py")
-        self.script_name = os.path.join(application_path,"assistant.exe")
+        self.script_name = script_name
 
     # 加载配置文件
     def loadConfig(self, tenantId):
@@ -96,7 +98,7 @@ class API:
         if self.is_running():
             print(f"Stopping {self.script_name}")
             # self.process.send_signal(signal.SIGINT)  # 发送中断信号给子进程
-            self.process.terminate
+            self.process.terminate()
             self.process.wait()  # 等待子进程结束
             print(f"{self.script_name} stopped")
             self.process = None

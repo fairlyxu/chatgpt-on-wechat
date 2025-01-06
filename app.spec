@@ -32,7 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['desktop_app\\desktop_vue_html\\public\\favicon.ico'],
+    icon=['logo.ico'],
 )
 coll = COLLECT(
     exe,
