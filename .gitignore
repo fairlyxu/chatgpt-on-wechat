@@ -37,3 +37,4 @@ dist/app.exe.WebView2
 dist/app.exe
 build/
 dist/assistant.exe
+dist/app/

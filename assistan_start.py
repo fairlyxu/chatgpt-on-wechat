@@ -6,7 +6,6 @@ import argparse
 from channel import channel_factory
 from config import load_config
 from plugins import *
-from channel.wechat.wechat_channel import WechatChannel
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config_file', type=str, help='配置文件目录', default="config-template.json")
@@ -70,6 +69,8 @@ else:
 
 if __name__ == "__main__":
     print("asistant is starting...")
+    logger.info("asistant is starting...")
+    logger.info(sys.argv)
     if len(sys.argv) > 1:
         config_file = sys.argv[1]
     else:

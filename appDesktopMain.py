@@ -14,7 +14,7 @@ import assistan_start
 if getattr(sys, 'frozen', False):
     # If the application is run as a bundle, the PyInstaller bootloader
     # extends the sys module by a flag frozen=True and sets the app
-    # path into variable _MEIPASS'.
+    # path into variable _MEIPASS'.  exe运行方式
     application_path = sys._MEIPASS
 else:
     application_path = os.path.dirname(os.path.abspath(__file__))
@@ -53,6 +53,8 @@ class API:
     # 加载配置文件
     def loadConfig(self, tenantId):
         self.config_file = getAbsolueFilePath('config_' + tenantId + '.json')
+        logging.Logger("加载配置" + self.config_file)
+        print("加载配置" + self.config_file)
         # 判断文件是否存在，如不存在，则加载config-template.json默认配置文件
         if not os.path.exists(self.config_file): 
             self.config_file = getAbsolueFilePath('config-template.json')
@@ -67,9 +69,11 @@ class API:
     def saveConfig(self, configObj, tenantId, token):
         configObj["tenant_id"] = tenantId
         configObj["auth_token"] = token
+        logging.Logger("保存配置" + getAbsolueFilePath('config_' + tenantId + '.json'))
         with open(getAbsolueFilePath('config_' + tenantId + '.json'), 'w', encoding='UTF-8') as f:
             # configObj 转成json字符串
             f.write(json.dumps(configObj))
+            self.config_file = getAbsolueFilePath('config_' + tenantId + '.json')
         return ApiResult(200, True, 'success')
 
     def startChat(self, configObj="", tenantId="", token=""):
@@ -80,7 +84,8 @@ class API:
             if not os.path.exists(filename):  # 如默认配置文件不存在，则报错
                 raise Exception('配置文件不存在')
             print(f"Starting {self.script_name} with config file: {self.config_file}")
-            args = [sys.executable, self.script_name]
+            # args = [sys.executable, self.script_name]
+            args = [self.script_name]
             if self.config_file:
                 args.append(self.config_file)
             self.process = subprocess.Popen(args)
@@ -90,7 +95,8 @@ class API:
     def stopChat(self, tenantId):
         if self.is_running():
             print(f"Stopping {self.script_name}")
-            self.process.send_signal(signal.SIGINT)  # 发送中断信号给子进程
+            # self.process.send_signal(signal.SIGINT)  # 发送中断信号给子进程
+            self.process.terminate
             self.process.wait()  # 等待子进程结束
             print(f"{self.script_name} stopped")
             self.process = None
@@ -178,7 +184,7 @@ def main():
     window = webview.create_window('元芋智能 聊天小助手', url, width=700,height=700,  js_api=api)
 
     # private_mode=False 表示保存cookie,使其在app关掉重启后，依然保存cookie和本地存储
-    webview.start(http_server=True,debug=True,private_mode=False) # 打开调试模式，开发时使用
+    webview.start(http_server=True,debug=False,private_mode=False) # 打开调试模式，开发时使用
    # webview.start(http_server=True,private_mode=False) # 关闭调试模式，生产环境时使用
 
 
